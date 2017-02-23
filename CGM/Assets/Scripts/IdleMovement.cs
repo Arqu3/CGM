@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
+/// Author: Ludwig Gustavsson
+/// Email: ludwiggustavsson3@gmail.com
+/// Last edited: 23/02/17
+/// 
 /// Placed on a camera, this script moves between waypoints using an animation-curve
 /// </summary>
 
@@ -14,6 +18,8 @@ public class IdleMovement : MonoBehaviour
     public AnimationCurve m_MovementCurve;
     [Range(0.1f, 100.0f)]
     public float m_MovementTime = 2.0f;
+    [Range(0.1f, 100.0f)]
+    public float m_Speed = 1.0f;
     [Range(0.0f, 100.0f)]
     public float m_ReachedDistance = 1.0f;
 
@@ -24,6 +30,9 @@ public class IdleMovement : MonoBehaviour
     [Range(0.5f, 10.0f)]
     public float m_LookAngle = 1.0f;
     public bool m_LookAtCurrent = false;
+
+    [Header("Control variables")]
+    public KeyCode m_DisableKey = KeyCode.Return;
 
     //Private vars
     //Waypoint
@@ -40,9 +49,19 @@ public class IdleMovement : MonoBehaviour
     private bool m_HasSetLook = false;
     private float m_RotationTimer = 0.0f;
     private float m_CurrentRot = 360.0f;
-    private Vector3 m_LookAtRot;
+    private Quaternion m_LookAtRot;
+    private Transform m_CurrentLookAt;
+
+    //Reset
+    private bool m_Enabled = true;
+    private bool m_Active = true;
 
     void Awake()
+    {
+        OnStart();
+    }
+
+    void OnStart()
     {
         m_CurrentWaypoint = m_StartWaypoint;
         if (!m_CurrentWaypoint)
@@ -50,21 +69,51 @@ public class IdleMovement : MonoBehaviour
             SetWaypoint(FindNearestWaypoint());
             Debug.Log("No starting waypoint set! found nearest: " + m_CurrentWaypoint.name);
         }
+        //transform.position = m_CurrentWaypoint.transform.position;
+        //m_LastWaypointPos = transform.position;
     }
 
     void OnEnable()
     {
-
+        if (!m_Enabled)
+        {
+            OnStart();
+            m_Enabled = true;
+            m_Active = true;
+        }
     }
 
     void OnDisable()
     {
+        m_Enabled = false;
+        m_Active = false;
+    }
 
+    void OnDrawGizmos()
+    {
+        if (m_CurrentLookAt)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawCube(m_CurrentLookAt.position, new Vector3(1.2f, 1.2f, 1.2f));
+        }
     }
 	
 	void Update()
     {
-		if (m_IsMoving && m_CurrentWaypoint)
+        if (Input.GetKeyDown(m_DisableKey))
+        {
+            m_Active = !m_Active;
+            if (m_Active)
+                OnStart();
+        }
+
+        if (m_Enabled && m_Active)
+            MovementUpdate();
+	}
+
+    void MovementUpdate()
+    {
+        if (m_IsMoving && m_CurrentWaypoint)
         {
             if (m_CurrentMoveTime <= m_MovementTime)
             {
@@ -72,10 +121,9 @@ public class IdleMovement : MonoBehaviour
                 {
                     if (!m_HasSetLook)
                     {
-                        //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.Euler(m_LookAtRot.x, m_LookAtRot.y, 0.0f), Time.deltaTime);
-                        transform.rotation = Quaternion.Euler(Mathf.LerpAngle(transform.rotation.eulerAngles.x, m_LookAtRot.x, Time.deltaTime), Mathf.LerpAngle(transform.rotation.eulerAngles.y, m_LookAtRot.y, Time.deltaTime), 0.0f);
+                        transform.rotation = Quaternion.Slerp(transform.rotation, m_LookAtRot, Time.deltaTime);
 
-                        if (Quaternion.Angle(transform.rotation, Quaternion.Euler(m_LookAtRot.x, m_LookAtRot.y, 0.0f)) < m_LookAngle)
+                        if (Quaternion.Angle(transform.rotation, m_LookAtRot) < m_LookAngle)
                             m_HasSetLook = true;
                     }
                 }
@@ -92,8 +140,10 @@ public class IdleMovement : MonoBehaviour
 
                 if (m_HasSetLook)
                 {
+                    transform.LookAt(m_CurrentLookAt);
+
                     m_CurrentMoveTime += Time.deltaTime;
-                    transform.position = Vector3.Lerp(m_LastWaypointPos, m_CurrentWaypoint.transform.position, m_MovementCurve.Evaluate(m_CurrentMoveTime / m_MovementTime));
+                    transform.position = Vector3.Lerp(m_LastWaypointPos, m_CurrentWaypoint.transform.position, m_Speed * m_MovementCurve.Evaluate(m_CurrentMoveTime / m_MovementTime));
 
                     if (Vector3.Distance(transform.position, m_CurrentWaypoint.transform.position) <= m_ReachedDistance)
                     {
@@ -101,6 +151,7 @@ public class IdleMovement : MonoBehaviour
                         m_IsRotating = true;
                     }
                 }
+
             }
             else
                 m_IsMoving = false;
@@ -115,7 +166,7 @@ public class IdleMovement : MonoBehaviour
         }
         else if (m_IsRotating)
             StartRotation();
-	}
+    }
 
     public void SetWaypoint(Waypoint moveTo)
     {
@@ -127,14 +178,13 @@ public class IdleMovement : MonoBehaviour
         m_CurrentRot = 360.0f;
         m_CurrentWaypoint = moveTo;
         m_IsMoving = true;
-        m_LookAtRot = Vector3.zero;
+        //m_LookAtRot = Vector3.zero;
 
         if (m_CurrentWaypoint && m_LookAtCurrent)
         {
-            Vector3 dir = m_CurrentWaypoint.transform.position - transform.position;
-            Vector3 dir2 = transform.forward;
-            dir2.y = 0.0f;
-            m_LookAtRot = Quaternion.FromToRotation(dir2.normalized, dir.normalized).eulerAngles;
+            m_CurrentLookAt = m_CurrentWaypoint.GetCustomTargets()[0].transform;
+            Vector3 dir = m_CurrentLookAt.position - transform.position;
+            m_LookAtRot = Quaternion.LookRotation(dir.normalized);
         }
     }
 

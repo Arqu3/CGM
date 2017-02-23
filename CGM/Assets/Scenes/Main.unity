@@ -37,7 +37,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657844, g: 0.49641222, b: 0.57481694, a: 1}
+  m_IndirectSpecularColor: {r: 0.4465785, g: 0.49641222, b: 0.57481694, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -181,11 +181,11 @@ GameObject:
   serializedVersion: 5
   m_Component:
   - component: {fileID: 211026543}
+  - component: {fileID: 211026544}
   - component: {fileID: 211026542}
   - component: {fileID: 211026541}
   - component: {fileID: 211026540}
   - component: {fileID: 211026539}
-  - component: {fileID: 211026544}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -291,7 +291,8 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  m_MovementTime: 0.1
+  m_MovementTime: 5
+  m_Speed: 1
   m_ReachedDistance: 0
   m_RotationCurve:
     serializedVersion: 2
@@ -299,27 +300,28 @@ MonoBehaviour:
     - serializedVersion: 2
       time: 0
       value: 0.011855498
-      inSlope: 0.83337694
-      outSlope: 0.83337694
+      inSlope: 1.223076
+      outSlope: 1.223076
       tangentMode: 34
     - serializedVersion: 2
-      time: 0.3375
-      value: 0.29312024
-      inSlope: 0.51006377
-      outSlope: 0.51006377
-      tangentMode: 34
+      time: 0.5236918
+      value: 0.65237033
+      inSlope: 0.7882108
+      outSlope: 0.7882108
+      tangentMode: 0
     - serializedVersion: 2
-      time: 0.99583334
-      value: 0.4160644
+      time: 1.9306724
+      value: 1.010747
       inSlope: 0.00000029802325
       outSlope: 0.00000029802325
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
-  m_RotationTime: 1
+  m_RotationTime: 10
   m_LookAngle: 1
   m_LookAtCurrent: 1
+  m_DisableKey: 13
 --- !u!1 &771956047
 GameObject:
   m_ObjectHideFlags: 0
