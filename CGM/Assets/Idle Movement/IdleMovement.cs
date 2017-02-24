@@ -5,7 +5,7 @@ using UnityEngine;
 /// <summary>
 /// Author: Ludwig Gustavsson
 /// Email: ludwiggustavsson3@gmail.com
-/// Last edited: 23/02/17
+/// Last edited: 24/02/17
 /// 
 /// Placed on a camera, this script moves between waypoints using an animation-curve
 /// </summary>
@@ -27,12 +27,11 @@ public class IdleMovement : MonoBehaviour
     public AnimationCurve m_RotationCurve;
     [Range(1.0f, 1000.0f)]
     public float m_RotationTime = 30.0f;
-    [Range(0.5f, 10.0f)]
-    public float m_LookAngle = 1.0f;
     public bool m_LookAtCurrent = false;
 
-    [Header("Control variables")]
+    [Header("Disable/enable variables")]
     public KeyCode m_DisableKey = KeyCode.Return;
+    public Transform m_StartTransform;
 
     //Private vars
     //Waypoint
@@ -51,6 +50,7 @@ public class IdleMovement : MonoBehaviour
     private float m_CurrentRot = 360.0f;
     private Quaternion m_LookAtRot;
     private Transform m_CurrentLookAt;
+    private float m_LookAngle = 1.0f;
 
     //Reset
     private bool m_Enabled = true;
@@ -63,14 +63,14 @@ public class IdleMovement : MonoBehaviour
 
     void OnStart()
     {
+        if (m_StartTransform)
+            transform.position = m_StartTransform.position;
         m_CurrentWaypoint = m_StartWaypoint;
         if (!m_CurrentWaypoint)
         {
             SetWaypoint(FindNearestWaypoint());
             Debug.Log("No starting waypoint set! found nearest: " + m_CurrentWaypoint.name);
         }
-        //transform.position = m_CurrentWaypoint.transform.position;
-        //m_LastWaypointPos = transform.position;
     }
 
     void OnEnable()
